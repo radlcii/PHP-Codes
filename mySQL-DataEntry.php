@@ -16,7 +16,7 @@
     
     To run the PHP test server, go to the command line and enter the following two commands:
     cd path/to/your/app
-    php -S localhost:8000
+    php -S localhost:8000   (Port 8000 was used in the example I found)
 
 -->
 <html>
@@ -34,10 +34,10 @@
         $fileArr = scandir($dir);
 
         $host="localhost";                                                      // Variables for the SQL connection ($conn)
-        $user="newb";
-        $password="";
-        $dbname="php_db_test";
-        $port=3306;
+        $user="MYSQL-USER-NAME";
+        $password="MYSQL-PASSWORD";
+        $dbname="MYSQL-SCHEMA/DB-NAME";
+        $port=MYSQL-CONNECTION-PORT;
         $socket="mysql";
 
         $conn = new mysqli($host, $user, $password, $dbname, $port, $socket);   // This makes the actual connection
