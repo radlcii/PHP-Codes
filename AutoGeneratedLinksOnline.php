@@ -46,7 +46,21 @@
 	    	});
 	    });
     </script>
-
+    <style>
+        * {
+            text-align:center;
+            color:gold;
+        }
+        body{
+            background-color:black;
+        }
+        form {
+            border: solid gold 1px;
+        }
+        button {
+            color:black;
+        }
+    </style>
 </head>
 <body>
     <h1>Just another PHP page</h1>
