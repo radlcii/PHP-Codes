@@ -3,18 +3,16 @@
     This page was build on 6/14/2019 by Robert De La Cruz
 
     Credits go to:
-    hugohabel's answer on https://stackoverflow.com/questions/11927260/printing-contents-of-array-on-separate-lines
-    Dark-Reaper-'s answer on https://stackoverflow.com/questions/1678010/php-server-on-local-machine/21872484#21872484
-    user1864610's answer on https://stackoverflow.com/questions/28160604/inserting-a-list-of-filenames-from-a-folder-into-mysql
-    php query code retrieved from https://www.tutorialrepublic.com/php-tutorial/php-mysql-insert-query.php
-    Extention extractor found at https://stackoverflow.com/questions/173868/how-do-i-get-extract-a-file-extension-in-php
-    MySQL user authentication issues answer found at https://stackoverflow.com/questions/50026939/php-mysqli-connect-authentication-method-unknown-to-the-client-caching-sha2-pa
-    get_browser_name function retrieved from Francesco R's response at https://php.net/manual/en/function.get-browser.php
-    And many other sources that Google turned up for me.
-
+    Javascript, HTML form and the PHP code to load the file into the database by vincy@phppot.com; https://phppot.com/php/import-csv-file-into-mysql-using-php/
+    As well as the sources on previous versions of this page, and many other sources that Google has turned up for me.
+    Special shout out to StackOverflow, where Google tends to send me.
 
     This is another code to use PHP's connection with HTML to automatically generate html hyperlinks.  
-    This version uses a selection of images, from my own profile at Imgur.com, gotten as screenshots from the game Guild Wars 2
+    This version uses a jquery/javascript and html form to choose a csv file to add to the database
+    I'll include a csv file in the GitHub repo consisting of the URLs and file extensions of images 
+    from my own profile at Imgur.com, screenshots from the game Guild Wars 2
+
+    The csv file's name on my GitHub repo is zz-ImgurImageURLs.csv, though you can use your own.
     
     To run the PHP test server, go to the command line and enter the following two commands:
     cd path/to/your/app
@@ -24,19 +22,57 @@
 <html>
 <head>
     <link rel="icon" href="data:,">                                             <!-- Resolving a favicon issue that appeared from nowhere -->
+
+    <script type="text/javascript">                                             // This code is what makes the form work from the local machine, something that PHP is not meant to do.  Found at https://phppot.com/php/import-csv-file-into-mysql-using-php/
+        $(document).ready(
+        function() {
+	    $("#frmCSVImport").on( "submit",
+	    function() {
+
+		$("#response").attr("class", "");
+		$("#response").html("");
+		var fileType = ".csv";
+		var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+("
+				+ fileType + ")$");
+		if (!regex.test($("#file").val().toLowerCase())) {
+			$("#response").addClass("error");
+			$("#response").addClass("display-block");
+			$("#response").html(
+					"Invalid File. Upload : <b>" + fileType
+							+ "</b> Files.");
+			return false;
+		    }
+		    return true;
+	    	});
+	    });
+    </script>
+
 </head>
 <body>
+    <h1>Just another PHP page</h1>
     <p> 
-        This is another code to use PHP's connection with HTML to automatically generate html hyperlinks.  
-        This version uses a selection of images, from my own profile at Imgur.com, gotten as screenshots 
-        from the game Guild Wars 2
+        This is another code to use PHP's connection with HTML to automatically generate html hyperlinks from a database table of image URLs as strings. <br>
+        This version uses an uploaded csv file, the one provided on my GitHub contains a selection of images from my own profile at Imgur.com, <br>
+        which are just random scenery screenshots from the game Guild Wars 2.
     </p>
+
+    <form class="form-horizontal" action="" method="post" name="uploadCSV" enctype="multipart/form-data">   <!-- This is the HTML form to upload the csv file.  Found at https://phppot.com/php/import-csv-file-into-mysql-using-php/ -->
+    <div class="input-row">
+        <label class="col-md-4 control-label">Choose CSV File</label> <input
+            type="file" name="file" id="file" accept=".csv">
+        <button type="submit" id="submit" name="import"
+            class="btn-submit">Import</button>
+        <br />
+    </div>
+    <div id="labelError"></div>
+    </form>
+
     <?php
         error_reporting(E_ALL);                                                 // This is ugly for a client to see but I'm the dev making a silly program.
         ini_set('display_errors', 1);                                           // These would probably be removed or at least commented out prior to shipping
 
         $host="localhost";                                                      // Variables for the SQL connection ($conn)
-        $user="newb";                                                           // Your MySQL user name
+        $user="newb";                                                           // Your MySQL user name (I am definitely the newb)
         $password="";                                                           // Your MySQL password
         $dbname="php_db_test";                                                  // Your MySQL Schema/DB name here
         $port=3306;                                                             // Your MySQL port number
@@ -44,59 +80,36 @@
 
         $conn = new mysqli($host, $user, $password, $dbname, $port, $socket);   // This makes the actual connection
 
-        echo '<br>Success... ' . mysqli_get_host_info( $conn ) . "<br>";        // Unnecessary, but it proves the connection was made
- 
         $conn->query( "DROP TABLE IF EXISTS php_db_test.ImgurImages;" );        // Remove previous version of table if one exists
         $conn->query( "CREATE DATABASE IF NOT EXISTS php_db_test;" );           // Create the database if it doesn't exist 
         $conn->query( "CREATE TABLE IF NOT EXISTS php_db_test.ImgurImages (     /* Create the table if one does not exist (Which it should not) */
             id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
             fileURL varchar(100) NOT NULL, 
-            fileExt varchar(10) NOT NULL                                        /* All the extensions are .jpg in this list.  This is for possible future use. */
+            fileExt varchar(10) NOT NULL 
             );"
         );
-        
-        /* Yes, I know this is the ugly hard-coded and ad-hoc way of doing this. */
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/FgKH0Xe.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/2S91xdW.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/nn2DpeO.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/mSwTMer.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/KVOh60G.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/LpI7FOB.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/DNMgPGc.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/8UAwQeQ.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/cVGt5GN.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/RKMTx4Q.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/5zwtTZ6.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/Df4PQHm.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/nKXW8xm.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/iNKXsVh.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/LJg557E.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/RK8h6rJ.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/UYfp8wh.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/VhpufNu.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/oicN5Qe.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/rQvUuBb.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/hROfaPX.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/wMFOcv5.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/opQzvgM.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/4aXDApM.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/HinniaO.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/7zpJI86.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/CJeJFo4.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/wjWPeH4.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/6boshxw.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/4MxP4lM.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/h0W9lmk.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/7vo9BUO.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/VwOS5ot.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/Qyb0C6x.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/LNbaWwu.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/WAkfngf.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/x03prya.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/XeLsvcf.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/4x6IQDX.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/IO3inbH.jpg' , '.jpg');" );
-        $conn->query( "INSERT INTO php_db_test.ImgurImages (fileURL, fileExt) VALUES ( 'https://i.imgur.com/qTpiVxN.jpg' , '.jpg');" );
+
+        if (isset($_POST["import"])) {                                          // This code block takes the file and reads it into the database. Original found at https://phppot.com/php/import-csv-file-into-mysql-using-php/
+            $fileName = $_FILES["file"]["tmp_name"];                            // This creates a temporary file in the directory of your PHP code, so don't be alarmed by a file with no extension appearing.
+            if ($_FILES["file"]["size"] > 0) {
+                $file = fopen($fileName, "r");
+                while (($column = fgetcsv($file, 10000, ",")) !== FALSE) {
+                    if (strcmp($column[0], "fileURL") == 0) {                   // This was added to exclude with the first line of the csv file which is just column names
+                        continue;
+                    } else {
+                        $sqlInsert = "INSERT INTO php_db_test.ImgurImages (fileURL,fileExt) values ('" . $column[0] . "','" . $column[1] . "')";
+                    }
+                    $result = mysqli_query($conn, $sqlInsert);
+                    if (! empty($result)) {
+                        $type = "success";
+                        $message = "CSV Data Imported into the Database";
+                    } else {
+                        $type = "error";
+                        $message = "Problem in Importing CSV Data";
+                    }
+                }
+            }
+        }
 
         $result = $conn->query("SELECT * FROM php_db_test.ImgurImages;" );      // Query the Images table and return everything in the table
         if ($result->num_rows > 0) {                                            // Check that there is a result in the first place
