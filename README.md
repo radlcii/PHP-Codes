@@ -12,3 +12,9 @@ The database and "Server" were located on the same device during development and
 Database software and some kind of server software or emulator is needed to test this code properly.
 Some program or system acting as a server (IIS in my case) needed to be set up because most browsers will detect that they are looking at a file system directly and will not allow some functions, such as hyperlinks, to work.  
 Depending where in the file system this is placed and run, Windows 10 permissions can stop this from functioning properly so it is  best to stay away from trying to test this on user folders such as Music, Pictures, Documents, etc. (Probably a good thing)
+
+The database building code likely wouldn't be able to run on a real server because of access/permissions protections.
+These codes are also very likely not written the way real PHP files would be, that will come in later iterations on this.
+A CSS file is provided.  
+
+I don't claim that it's pretty or even really useful, only that I got it to work and that was a learning experience.
